@@ -8,5 +8,6 @@ lfs-pkgman is a simple package manager for Linux From Scratch systems that can h
 Just run "make" and copy the generated binary into /usr/bin so that it can be used from anywhere
 # Note
 It's recommended to track base system packages with this tool if you plan to use it as a package manager, so that some program not part of the base system will not silently replace a system file, because this tool only prevents overwriting a package from a different tracked package.
-# WARNING
-This tool should not be used on systems with an existing package manager as they can collide in weird untested ways
+# WARNINGS
+- I have not yet tested that this package behaves properly on a normal system, but I did test the operations in a simulated root filesystem, so don't use this on a system that must remain stable(LFS shouldn't be used on systems that must remain stable anyway, but just putting accent on that)
+- This tool should not be used on systems with an existing package manager as they can collide in weird untested ways
