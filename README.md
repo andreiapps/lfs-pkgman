@@ -19,5 +19,6 @@ cd /tmp/glibc-build
 find . ! -type d | sed 's|^\.||' >> /var/lib/lfs-pkgman/packages/glibc
 rm -rf /tmp/glibc-build
 ```
+Make sure to also add the contents of the 32-bit version if building Multilib Linux From Scratch
 - This tool should not be used on systems with an existing package manager(except pip which is also in LFS) as they can collide in weird untested ways
 - You shouldn't track Python packages with this tool, as pip already does a good enough job and can cause issues while providing no extra help
