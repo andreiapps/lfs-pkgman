@@ -11,6 +11,7 @@ Also checks conflicts with other tracked packages and preserved manually marked 
 #include <cctype>
 #include <unordered_map>
 #include <unordered_set>
+#include <algorithm>
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -51,7 +52,9 @@ int get_contents(fs::path current_directory) {
 					error_code = 1;
 				}
 			}
-			else contents.push_back(entry.path());
+			else {
+				contents.push_back(entry.path());
+			}
 		}
 	}
 	catch (fs::filesystem_error e) {
@@ -168,6 +171,8 @@ Usage:
 			}
 			cout << "Copying files...\n";
 			for (auto entry:contents) {
+				// Skip GNU info index file so it doesn't get overwritten
+				if (entry == "usr/share/info/dir") continue;
 				if (config_files.count(entry) == 0) {
 					fs::path destination = root / entry;
 					fs::create_directories((destination).parent_path());
@@ -214,7 +219,20 @@ Usage:
 				return 1;
 			}
 			metadata_file << version << '\n';
-			for (auto entry:contents) metadata_file << entry.string() << '\n';
+			for (auto entry:contents) {
+				// Skip GNU info index file so it doesn't get registered as belonging to some random package
+				if (entry == "usr/share/info/dir") continue;
+				metadata_file << entry.string() << '\n';
+			}
+			if (fs::exists(fs::path{pkg_dir} / "usr/share/info/dir")) {
+				cout << "Installing GNU info pages...\n";
+				for (auto entry:fs::directory_iterator{fs::path{pkg_dir} / "usr/share/info"}) {
+					if (entry.is_regular_file() && entry.path().filename() != "dir") {
+						string command = "install-info " + (root / "usr/share/info" / entry.path().filename()).string() + " " + (root / "usr/share/info/dir").string() + " 2> /dev/null";
+						system(command.c_str());
+					}
+				}
+			}
 			cout << "Successfully installed " << name << '\n';
 		}
 		catch (fs::filesystem_error e) {
@@ -358,7 +376,7 @@ Usage:
 		while (getline(config_file_list_in, current_config_file_string)) {
 			if (current_config_file_string.empty()) continue;
 			current_config_file = current_config_file_string;
-			if (current_config_file != config_file_path.relative(root)) {
+			if (current_config_file != config_file_path.lexically_relative(root)) {
 				config_files.push_back(current_config_file_string);
 			}
 			else {
