@@ -122,7 +122,7 @@ Usage:
 			return 1;
 		}
 		for (auto &entry:contents) {
-			entry = fs::relative(entry, pkg_dir.path());
+			entry = entry.lexically_relative(pkg_dir.path());
 		}
 		try {
 			fs::path metadata_dir_path = root / "var/lib/lfs-pkgman/packages/";
@@ -312,7 +312,7 @@ Usage:
 			while (getline(config_file_list_in, current_config_file_path_string)) {
 				if (current_config_file_path_string.empty()) continue;
 				current_config_file_path = current_config_file_path_string;
-				if (current_config_file_path == fs::relative(config_file_path, root)) {
+				if (current_config_file_path == config_file_path.lexically_relative(root)) {
 					cout << "File is already marked as config\n";
 					return 0;
 				}
@@ -323,7 +323,7 @@ Usage:
 			cerr << "lfs-pkgman mark-config: error opening config files list for writing\n";
 			return 1;
 		}
-		config_file_list_out << fs::relative(config_file_path, root).string() << '\n';
+		config_file_list_out << config_file_path.lexically_relative(root).string() << '\n';
 	}
 	// unmark-config command - unmarks a configuration file
 	else if (command == "unmark-config") {
@@ -358,7 +358,7 @@ Usage:
 		while (getline(config_file_list_in, current_config_file_string)) {
 			if (current_config_file_string.empty()) continue;
 			current_config_file = current_config_file_string;
-			if (current_config_file != fs::relative(config_file_path, root)) {
+			if (current_config_file != config_file_path.relative(root)) {
 				config_files.push_back(current_config_file_string);
 			}
 			else {
