@@ -176,7 +176,9 @@ Usage:
 				if (config_files.count(entry) == 0) {
 					fs::path destination = root / entry;
 					fs::create_directories((destination).parent_path());
-					if (fs::exists(destination)) {
+					// I add is_symlink as an alternative condition because exists will follow symlinks
+					// Otherwise dangling symlinks willevaluate to false
+					if (fs::exists(destination) || fs::is_symlink(destination)) {
 						fs::remove_all(destination);
 					}
 					fs::copy(pkg_dir / entry, destination, fs::copy_options::overwrite_existing | fs::copy_options::copy_symlinks);
