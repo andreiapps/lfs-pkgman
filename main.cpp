@@ -158,7 +158,7 @@ Usage:
 				fs::path destination = root / entry;
 				// Check if the destination exists and its type conflicts with the source's
 				if (fs::exists(destination) && fs::is_directory(source) != fs::is_directory(destination)) {
-					cerr << "lfs-pkgman install: " << source.string() << " and " << destination.string() << " are of different types(one is file and one is directory)";
+					cerr << "lfs-pkgman install: " << source.string() << " and " << destination.string() << " are of different types(one is file and one is directory)\n";
 					return 1;
 				}
 			}
