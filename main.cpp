@@ -131,7 +131,7 @@ Usage:
 			fs::path metadata_dir_path = root / "var/lib/lfs-pkgman/packages/";
 			fs::create_directories(metadata_dir_path);
 			fs::path metadata_file_path = metadata_dir_path / name;
-			cout << "Checking for conflicts with other packages...\n";
+			cout << "Checking for conflicts...\n";
 			for (auto entry:fs::directory_iterator{metadata_dir_path}) {
 				if (entry.path() == metadata_file_path) continue;
 				ifstream current_metadata_file{entry.path()};
@@ -154,6 +154,13 @@ Usage:
 					cerr << "lfs-pkgman install: file " << entry << " conflicts with package " << owner[entry] << '\n';
 					return 1;
 				}
+				fs::path source = pkg_dir / entry;
+				fs::path destination = root / entry;
+				// Check if the destination exists and its type conflicts with the source's
+				if (fs::exists(destination) && fs::is_directory(source) != fs::is_directory(destination)) {
+					cerr << "lfs-pkgman install: " << source.string() << " and " << destination.string() << " are of different types(one is file and one is directory)";
+					return 1;
+				}
 			}
 			unordered_set<fs::path> config_files;
 			fs::path config_file_list_path = root / "var/lib/lfs-pkgman/config_files";
@@ -174,14 +181,14 @@ Usage:
 				// Skip GNU info index file so it doesn't get overwritten
 				if (entry == "usr/share/info/dir") continue;
 				if (config_files.count(entry) == 0) {
+					fs::path source = pkg_dir / entry;
 					fs::path destination = root / entry;
-					fs::create_directories((destination).parent_path());
-					// I add is_symlink as an alternative condition because exists will follow symlinks
-					// Otherwise dangling symlinks willevaluate to false
+					fs::create_directories(destination.parent_path());
+					// The exists functions follows symlinks so I need to check if it's symlink so that it catches dangling symlinks
 					if (fs::exists(destination) || fs::is_symlink(destination)) {
 						fs::remove_all(destination);
 					}
-					fs::copy(pkg_dir / entry, destination, fs::copy_options::overwrite_existing | fs::copy_options::copy_symlinks);
+					fs::copy(source, destination, fs::copy_options::overwrite_existing | fs::copy_options::copy_symlinks);
 				}
 			}
 			if (fs::exists(metadata_file_path)) {
@@ -238,7 +245,14 @@ Usage:
 			cout << "Successfully installed " << name << '\n';
 		}
 		catch (fs::filesystem_error e) {
-			cerr << "lfs-pkgman install: " << e.code().message() << '\n';
+			cerr << "Error: filesystem operation failed!\n";
+			cerr << "Reason: " << e.code().message() << "\n";
+			if (!e.path1().empty()) {
+				cerr << "Source: " << e.path1().string() << "\n";
+			}
+			if (!e.path2().empty()) {
+				cerr << "Destination: " << e.path2().string() << "\n";
+			}
 			return 1;
 		}
 	}
