@@ -16,7 +16,7 @@ make DESTDIR=/tmp/glibc-build install
 mkdir -p /var/lib/lfs-pkgman/packages
 echo <Glibc version> > /var/lib/lfs-pkgman/packages/glibc
 cd /tmp/glibc-build
-find . ! -type d | sed 's|^\./||' >> /var/lib/lfs-pkgman/packages/glibc
+find . ! -type d | sed -e 's|^\./||' -e '/usr\/share\/info\/dir/d' >> /var/lib/lfs-pkgman/packages/glibc
 rm -rf /tmp/glibc-build
 ```
 Make sure to also add the contents of the 32-bit version if building Multilib Linux From Scratch
