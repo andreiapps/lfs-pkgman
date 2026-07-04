@@ -234,6 +234,8 @@ Usage:
 			for (auto entry:contents) {
 				// Skip GNU info index file so it doesn't get registered as belonging to some random package
 				if (entry == "usr/share/info/dir") continue;
+				// Also skip the perllocal.pod files for perl modules as I did when copying files
+				if (entry.filename() == "perllocal.pod") continue;
 				metadata_file << entry.string() << '\n';
 			}
 			if (fs::exists(fs::path{pkg_dir} / "usr/share/info/dir")) {
