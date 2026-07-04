@@ -1,5 +1,5 @@
 /* lfs-pkgman - simple package manager for Linux From Scratch
-Installs packages compile and installed into a directory with a command like "make DESTDIR=package_destdir install"
+Installs packages compiled and installed into a directory with a command like "make DESTDIR=package_destdir install"
 Also checks conflicts with other tracked packages and preserved manually marked config files
 */
 
@@ -180,6 +180,9 @@ Usage:
 			for (auto entry:contents) {
 				// Skip GNU info index file so it doesn't get overwritten
 				if (entry == "usr/share/info/dir") continue;
+				// Also skip the perllocal.pod files for perl modules as it's not useful and most Linux distributions
+				// remove it anyway
+				if (entry.filename() == "perllocal.pod") continue;
 				if (config_files.count(entry) == 0) {
 					fs::path source = pkg_dir / entry;
 					fs::path destination = root / entry;
