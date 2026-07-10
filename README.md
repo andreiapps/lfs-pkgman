@@ -9,7 +9,6 @@ Just run "make" and copy the generated binary into /usr/bin so that it can be us
 # Note
 It's recommended to track base system packages with this tool if you plan to use it as a package manager, so that some program not part of the base system will not silently replace a system file, because this tool only prevents overwriting a package from a different tracked package.
 # WARNINGS
-- I have not yet tested that this package behaves properly on a normal system, but I did test the operations in a simulated root filesystem, so use this at your own risk
 - You shouldn't install Glibc with this tool as it can corrupt the entire system. It's recommended to install Glibc the normal way, and optionally create a metadata file manually with the following commands:
 ```bash
 make DESTDIR=/tmp/glibc-build install
